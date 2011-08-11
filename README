@@ -1,0 +1,29 @@
+OAIroboros
+
+OAIroboros is an OAI-PMH client designed to perform parallel requests against a single provider.  It uses Typhoeus for the HTTP client (therefore there is a curl dependency).  The expected use case for OAIroboros (vs., say, the much more mature and dependable ruby-oai gem) is to issue a ListSets request and then simultaneously run a ListIdentifiers or ListRecords request against that set list.
+
+For example:
+
+>> client = OAIroboros:Client.new("http://example.org/oai-pmh")
+
+>> client.list_sets
+
+  This doesn't actually issue the request, it just queues it.  To execute:
+
+>> requests = client.run
+
+  Which returns an array of issued request responses
+
+>> requests.each do | request |
+>>	request.handled_response.sets.each do | set |
+>>		set.list_identifiers
+>>	end
+>> end
+
+ This queues up a bunch of ListIdentifier requests.
+
+>> list_ids = client.run
+
+This returns an array of the queued ListIdentifier request responses.
+
+Obviously, this has the power to absolutely melt a run of the mill OAI-PMH server (by default, it can send up to 200 parallel requests), so use with caution.
